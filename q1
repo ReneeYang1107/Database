@@ -1,0 +1,42 @@
+with part1 as(
+select cust, prod, state, round(avg(quant)) as "PROD_AVG"
+from sales
+group by cust, prod, state
+),
+
+part2 as(
+select A.cust as cust, A.prod as prod, A.state as state, round(avg(B.quant)) as "OTHER_CUST_AVG"
+from sales A, sales B
+where A.cust !=B.cust and A.prod=B.prod and A.state=B.state
+group by A.cust, A.prod, A.state
+),
+															   
+part3 as(
+select A.cust as cust, A.prod as prod, A.state as state, round(avg(B.quant)) as "OTHER_PROD_AVG"
+from sales A, sales B
+where A.prod !=B.prod and A.cust= B.cust and A.state= B.state
+group by A.cust, A.prod, A.state
+)
+															   
+select A.cust as "CUSTOMER", A.prod as "PRODUCT", A.state as "STATE", "PROD_AVG", "OTHER_CUST_AVG", "OTHER_PROD_AVG"
+from part1 A natural full outer join part2 natural full outer join part3
+
+Version2:
+
+with p1 as(
+select A.cust, A.prod, A.state, round(avg(A.quant)) as prod_avg, round(avg(B.quant)) as other_cust_avg
+from sales A, sales B
+where A.cust != B.cust and A.prod=B.prod and A.state=B.state																 
+group by A.cust, A.prod, A.state
+),
+p2 as(
+select A.cust, A.prod, A.state, round(avg(A.quant)) as prod_avg, round(avg(B.quant)) as other_prod_avg
+from sales A, sales B
+where A.prod != B.prod and A.cust= B.cust and A.state=B.state																		 
+group by A.cust, A.prod, A.state
+)
+select p1.cust,p1.prod, p1.state,p1.prod_avg, p1.other_cust_avg, p2.other_prod_avg
+from p1, p2
+where p1.cust=p2.cust and p1.prod=p2.prod and p1.state=p2.state
+																	   
+

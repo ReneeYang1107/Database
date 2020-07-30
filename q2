@@ -1,0 +1,24 @@
+with p1 as(
+select cust, prod, month, avg(quant) as avg_q
+from sales
+group by cust, prod, month
+),
+p2 as(
+select distinct cust, prod, mon.month
+from sales, (values(1),(2),(3),(4),(5),(6),(7),(8),(9),(10),(11),(12)) as mon(month)
+),
+p3 as(
+select p2.cust, p2.prod, p2.month, round(p1.avg_q) as before_avg
+from p1 , p2
+where p1.cust = p2.cust and p1.prod = p2.prod and p2.month = p1.month+1
+),
+p4 as(
+select p2.cust, p2.prod, p2.month, round(p1.avg_q) as after_avg
+from p1 , p2
+where p1.cust = p2.cust and p1.prod = p2.prod and p2.month = p1.month-1
+)
+
+select * 
+from p3 full outer join  p4
+using (cust, prod, month)
+order by cust, prod, month

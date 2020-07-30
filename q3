@@ -1,0 +1,24 @@
+with part1 as(
+select cust, prod, sum(quant) as total_sales
+from sales
+group by cust, prod
+),
+
+part2 as(
+select cust, prod, month, sum(quant) as monthly_sales
+from sales
+group by cust, prod, month
+),
+
+part3 as(
+select A.cust, A.prod, A.month, sum(B.monthly_sales) as monthly_sales
+from part2 A, part2 B
+where A.cust= B.cust and A.prod= B.prod and A.month>= B.month
+group by A.cust, A.prod, A.month
+)
+
+select part3.cust as "CUSTOMER", part3.prod as "PRODUCT", min(part3.month) as "1/2 PURCHASED BY MONTH"
+from part1, part3
+where part1.cust= part3.cust and part1.prod= part3.prod and part3.monthly_sales> part1.total_sales/2
+group by part3.cust, part3.prod
+order by part3.cust, part3.prod
